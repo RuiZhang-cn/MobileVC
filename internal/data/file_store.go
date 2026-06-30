@@ -2333,40 +2333,51 @@ func (projection projectionLightweightJSON) toProjectionSnapshot() ProjectionSna
 	}
 }
 
+// fileSafeSessionID 把 sessionID 转换成可安全用作文件名的形式。
+// mirror session ID 形如 "claude-session:<uuid>" / "codex-thread:<id>"，
+// 其中的冒号在 Windows NTFS 上会被解释为 Alternate Data Stream 分隔符，
+// 导致按该名字读写文件全部失败。统一替换为 "__" 以保证跨平台一致。
+func fileSafeSessionID(sessionID string) string {
+	if !strings.ContainsAny(sessionID, ":") {
+		return sessionID
+	}
+	return strings.ReplaceAll(sessionID, ":", "__")
+}
+
 func (s *FileStore) sessionPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".json")
 }
 
 func (s *FileStore) sessionLogEntriesPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".log_entries.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".log_entries.json")
 }
 
 func (s *FileStore) sessionLogEntriesIndexPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".log_entries.idx.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".log_entries.idx.json")
 }
 
 func (s *FileStore) sessionRuntimeMetaPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".runtime_meta.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".runtime_meta.json")
 }
 
 func (s *FileStore) sessionContextPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".context.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".context.json")
 }
 
 func (s *FileStore) sessionPermissionPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".permission.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".permission.json")
 }
 
 func (s *FileStore) sessionDiffsPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".diffs.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".diffs.json")
 }
 
 func (s *FileStore) sessionTerminalPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".terminal.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".terminal.json")
 }
 
 func (s *FileStore) sessionTerminalExecutionsPath(sessionID string) string {
-	return filepath.Join(s.baseDir, sessionID+".terminal_executions.json")
+	return filepath.Join(s.baseDir, fileSafeSessionID(sessionID)+".terminal_executions.json")
 }
 
 func (s *FileStore) BaseDir() string {
