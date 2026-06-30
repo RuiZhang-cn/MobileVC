@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -2336,9 +2337,15 @@ func (projection projectionLightweightJSON) toProjectionSnapshot() ProjectionSna
 // fileSafeSessionID 把 sessionID 转换成可安全用作文件名的形式。
 // mirror session ID 形如 "claude-session:<uuid>" / "codex-thread:<id>"，
 // 其中的冒号在 Windows NTFS 上会被解释为 Alternate Data Stream 分隔符，
-// 导致按该名字读写文件全部失败。统一替换为 "__" 以保证跨平台一致。
+// 导致按该名字读写文件全部失败。
+//
+// 仅在 Windows 上替换冒号；macOS/Linux 冒号是合法文件名字符，保持原样以免
+// 影响这些平台上已有的会话缓存文件名。
 func fileSafeSessionID(sessionID string) string {
-	if !strings.ContainsAny(sessionID, ":") {
+	if runtime.GOOS != "windows" {
+		return sessionID
+	}
+	if !strings.Contains(sessionID, ":") {
 		return sessionID
 	}
 	return strings.ReplaceAll(sessionID, ":", "__")
