@@ -862,6 +862,7 @@ func (r *PtyRunner) Close() error {
 	r.suppressExitError = true
 	r.mu.Unlock()
 
+	killCommandProcess(cmd)
 	if cancel != nil {
 		cancel()
 	}
@@ -874,7 +875,6 @@ func (r *PtyRunner) Close() error {
 	if outputCloser != nil {
 		_ = outputCloser.Close()
 	}
-	killCommandProcess(cmd)
 	return nil
 }
 

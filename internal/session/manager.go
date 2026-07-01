@@ -178,11 +178,11 @@ func (m *manager) closeActive() {
 		m.claudeLifecycle = "inactive"
 	}
 	m.mu.Unlock()
-	if cancel != nil {
-		cancel()
-	}
 	if current != nil {
 		_ = current.Close()
+	}
+	if cancel != nil {
+		cancel()
 	}
 }
 

@@ -114,9 +114,7 @@ func (r *ExecRunner) Close() error {
 	r.mu.Lock()
 	cmd := r.cmd
 	r.mu.Unlock()
-	if cmd != nil && cmd.Process != nil {
-		_ = cmd.Process.Kill()
-	}
+	killCommandProcess(cmd)
 	return nil
 }
 
