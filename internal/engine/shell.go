@@ -45,18 +45,21 @@ func newShellCommand(ctx context.Context, command string, mode Mode) *exec.Cmd {
 			}
 			cmd := exec.CommandContext(ctx, spec.gitBash, "-lc", strings.Join(wrappedParts, " "))
 			cmd.Env = shellEnvironment(spec, command)
+			isolateCommandProcessGroup(cmd)
 			hideCommandWindow(cmd)
 			return cmd
 		}
 		args := append([]string{cliEntry}, claudeCommandArgs(command)...)
 		cmd := exec.CommandContext(ctx, nodeEntry, args...)
 		cmd.Env = shellEnvironment(spec, command)
+		isolateCommandProcessGroup(cmd)
 		hideCommandWindow(cmd)
 		return cmd
 	}
 	preparedCommand := prepareShellCommand(command, spec, mode)
 	cmd := exec.CommandContext(ctx, spec.path, append(spec.args, preparedCommand)...)
 	cmd.Env = shellEnvironment(spec, command)
+	isolateCommandProcessGroup(cmd)
 	hideCommandWindow(cmd)
 	return cmd
 }
